@@ -11,29 +11,25 @@ import urllib.request, urllib.error, urllib.parse,urllib.request,urllib.parse,ur
 import sys
 import socket
 import os
-import socket, struct
+import struct
 
 class TYUTLogin:
-    # analyze OS windows/linux
-    # if (os.name == "nt"):#windows
-    # # get local ip (windows)
-    #     localip = socket.gethostbyname_ex(socket.gethostname())
-    # else:#linux or unix
-    # # get local ip (unix)
-    #     import fcntl
-    #     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    #     localip = socket.inet_ntoa(fcntl.ioctl(s.fileno(), 0x8915, struct.pack('256s', 'eth0'[:15]))[20:24])
-    ipList = socket.gethostbyname_ex(socket.gethostname())
-    ips = []
-    for ip in ipList[2]:
-        if not (ip.startswith("192") or ip.startswith("169")):
-           ips.append(ip)
-    if len(ips) > 1 or len(ips) == 0:
-        print("There are not only one ip address or no ip fit the rule")
-        print(ipList)
-        exit()
-    localip = ips[0]
-    print(localip)
+    localip = ""
+    def __init__(self, netcardName):
+        # analyze OS windows/linux
+        if (os.name == "nt"):#windows
+        # get local ip (windows)
+            localip = socket.gethostbyname_ex(socket.gethostname())
+        else:#linux or unix
+        # get local ip (unix)
+            import netifaces as ni
+            ip = ni.ifaddresses(netcardName)[ni.AF_INET][0]['addr']
+        if not len(ip) == 13:
+            print("There are not only one ip address or no ip fit the rule")
+            print(ni.ifaddresses(netcardName))
+            exit()
+        else:
+            self.localip = ip
 
     def getIP(self):
         return self.localip
