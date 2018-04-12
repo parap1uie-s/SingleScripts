@@ -10,29 +10,28 @@
 
 from AutoLogin import TYUTLogin
 from Notifier import Mailer
+from Config import *
 import sys
 
-username = "" # eg:wangnima0011
-password = ""   # eg:abcdefgasda
 if len(sys.argv) < 3:
     print("Use hard code params.")
     if(username == '' or password == ''):
         print("username or password error!")
         exit()
+    else:
+    	username = Config.username
+    	password = Config.password
 else:
     username = sys.argv[1]
     password = sys.argv[2]
-l = TYUTLogin()
+
+l = TYUTLogin(Config.netcard)
 if l.check() == -1:
-    ret = l.login(username, password)
+    ret = l.login(username, password, Config.host, Config.port)
 else:
     ret = 0
 
-if(ret == 1):
-    mail_host="smtp.163.com"  #设置服务器
-    mail_user=""    #发件邮箱用户名
-    mail_pass="~`,hZVzH+2ENB:Pb"   #发件邮箱密码 
-    receivers = ['aaa@bbb.com','...','...']  # 收件人地址列表
-    m = Mailer(mail_host,mail_user,mail_pass)
-    receiverNum, succNum = m.SendMail(receivers,"这里填标题",l.getIP())
+if(ret == 1 && Config.enableMail):
+    m = Mailer(Config.smtpMailHost, Config.smtpMailUser, Config.smtpMailPassword)
+    receiverNum, succNum = m.SendMail(Config.smtpMailReceivers,Config.mailTitle, l.getIP())
     print("Send "+str(receiverNum)+" mails, success " + str(succNum) +" mails")

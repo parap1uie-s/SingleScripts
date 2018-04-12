@@ -24,20 +24,19 @@ class TYUTLogin:
         # get local ip (unix)
             import netifaces as ni
             ip = ni.ifaddresses(netcardName)[ni.AF_INET][0]['addr']
-        if not len(ip) == 13:
-            print("There are not only one ip address or no ip fit the rule")
-            print(ni.ifaddresses(netcardName))
-            exit()
-        else:
-            self.localip = ip
+        self.localip = ip
 
     def getIP(self):
         return self.localip
     # check network status
     def check(self):
         url = "http://www.baidu.com"
-        response = urllib.request.urlopen(url)
-        geturl = response.geturl()
+        try:
+            response = urllib.request.urlopen(url)
+            geturl = response.geturl()
+        except Exception as e:
+            print("not connected")
+            return -1
         if url == geturl:
             print("connected")
             return 0
@@ -47,24 +46,22 @@ class TYUTLogin:
 
 
     # login
-    def login(self,username,password):
-        url = "http://202.207.240.67:801/eportal/?c=ACSetting&a=Login&wlanuserip="+self.localip+"&wlanacip=null&wlanacname=&port=&iTermType=1&mac=000000000000&ip="+self.localip+"&redirect=null"
+    def login(self,username,password, host, port):
+        url = "http://{}:{}/eportal/?c=ACSetting&a=Login&wlanuserip=".format(host,port)+self.localip+"&wlanacip=null&wlanacname=&port=&iTermType=1&mac=000000000000&ip="+self.localip+"&redirect=null"
         request = urllib.request.Request(url)
-        request.add_header('Host','202.207.240.67:801')
+        request.add_header('Host','{}:{}'.format(host,port))
         request.add_header('Connection','keep-alive')
         request.add_header('Cache-Control','max-age=0')
-        request.add_header('Origin','http://202.207.240.67')
+        request.add_header('Origin','http://{}'.format(host))
         request.add_header('Upgrade-Insecure-Requests','1')
         request.add_header('User-Agent','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36')
         request.add_header('Content-Type','application/x-www-form-urlencoded')
         request.add_header('Accept','text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8')
-        # request.add_header('Referer','http://202.207.240.67/a70.htm?wlanuserip=101.7.149.100&wlanacname=&me60=ethtrunk/2:2775.653')
-        request.add_header('Referer','http://202.207.240.67/a70.htm')
+        request.add_header('Referer','http://{}/a70.htm'.format(host))
         request.add_header('Accept-Encoding','gzip, deflate, br')
         request.add_header('Accept-Language','zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4')
         request.add_header('Cookie','wlanacname=; wlanacip=null')
 
-        # data = r"DDDDD="+username+"&upass="+password+"&R1=0&R2=&R6=0&para=00&0MKKey=123456"
         data = {'DDDDD' : username, 'upass' : password, 'R1':'0', 'R2':'', 'R6':'0', 'para':'00','0MKKey':'123456'}
         data = urllib.parse.urlencode(data).encode(encoding='UTF8')
         response = urllib.request.urlopen(request,data)
